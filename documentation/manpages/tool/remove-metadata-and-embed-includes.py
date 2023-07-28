@@ -24,23 +24,24 @@ def read_lines_document_file(this_file, original_lines):
     lines = original_lines
 
     # metadata section is optional
-    if lines[0] == '---' + os.linesep:
+    if lines[0] == f'---{os.linesep}':
         # remove first ---
         lines = lines[1:]
 
         # find index of second --- and remove that and everything before it
         for i in range(len(lines)):
-            if lines[i] == '---' + os.linesep:
+            if lines[i] == f'---{os.linesep}':
                 lines = lines[i+1:]
                 break
 
     for line in lines:
         if '[!INCLUDE' in line:
-            match = re.search(r'\[!INCLUDE *\[[^\]]+\] *\(([^)]+)\)', line)
-            if match:
+            if match := re.search(
+                r'\[!INCLUDE *\[[^\]]+\] *\(([^)]+)\)', line
+            ):
                 relative_path = match.groups()[0]
                 if relative_path.startswith('~/'):
-                    git_repo_root = git_root(this_file) + '/'
+                    git_repo_root = f'{git_root(this_file)}/'
                     file_to_include = os.path.join(git_repo_root, relative_path[2:])
                 else:
                     file_to_include = os.path.join(os.path.dirname(this_file), relative_path)
@@ -48,7 +49,7 @@ def read_lines_document_file(this_file, original_lines):
                     lines_to_include = f.readlines()
                     result.extend(read_lines_document_file(file_to_include, lines_to_include))
             else:
-                assert False, 'Unable to parse: ' + line
+                assert False, f'Unable to parse: {line}'
         else:
             result.append(line)
     return result
@@ -57,11 +58,11 @@ def main(args):
     filename = args[1]
     with open(filename) as original:
         lines = read_lines_document_file(filename, original.readlines())
-        with open(filename + '.tmp', 'w') as output:
+        with open(f'{filename}.tmp', 'w') as output:
             for line in lines:
                 output.write(line)
 
-    os.replace(filename + '.tmp',  filename)
+    os.replace(f'{filename}.tmp', filename)
 
 if __name__ == '__main__':
     sys.exit(main(sys.argv))
