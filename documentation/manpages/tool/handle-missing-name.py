@@ -11,7 +11,6 @@ import sys
 
 def handle_missing_name(this_file, original_lines):
 
-    result = []
     lines = original_lines
 
     for line in lines:
@@ -24,14 +23,17 @@ def handle_missing_name(this_file, original_lines):
             lines = lines[i:]
             break
 
-    result.append('# Name' + os.linesep)
-    result.append(os.linesep)
+    result = [f'# Name{os.linesep}', os.linesep]
     command_name = os.path.basename(this_file)
     command_name = os.path.splitext(command_name)[0]
-    result.append(command_name + ' - ' + lines[0].strip().strip('#') + os.linesep)
-    result.append(os.linesep)
-    result.append('# Description' + os.linesep)
-    result.append(os.linesep)
+    result.extend(
+        (
+            f'{command_name} - ' + lines[0].strip().strip('#') + os.linesep,
+            os.linesep,
+            f'# Description{os.linesep}',
+            os.linesep,
+        )
+    )
     result.extend(lines[1:])
 
     return result
@@ -40,11 +42,11 @@ def main(args):
     filename = args[1]
     with open(filename) as original:
         lines = handle_missing_name(filename, original.readlines())
-        with open(filename + '.tmp', 'w') as output:
+        with open(f'{filename}.tmp', 'w') as output:
             for line in lines:
                 output.write(line)
 
-    os.replace(filename + '.tmp',  filename)
+    os.replace(f'{filename}.tmp', filename)
 
 if __name__ == '__main__':
     sys.exit(main(sys.argv))

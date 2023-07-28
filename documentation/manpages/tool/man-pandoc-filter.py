@@ -16,7 +16,16 @@ def promote_and_capitalize_sections(key, value, format, meta):
     if key == 'Header':
         header_contents = value[2]
         header_text = ' '.join([ x['c'] for x in header_contents if x['t'] == 'Str']).lower()
-        if header_text in ['name', 'synopsis', 'description', 'arguments', 'options', 'examples', 'environment variables', 'see also']:
+        if header_text in {
+            'name',
+            'synopsis',
+            'description',
+            'arguments',
+            'options',
+            'examples',
+            'environment variables',
+            'see also',
+        }:
             # capitalize
             for element in header_contents:
                 if element['t'] == 'Str':
@@ -41,10 +50,7 @@ def fix_space_in_command_names(key, value, format, meta):
     if key == 'Header':
         header_contents = value[2]
         header_text = ' '.join([ x['c'] for x in header_contents if x['t'] == 'Str']).lower()
-        if header_text == 'name':
-            fix_command_name = True
-        else:
-            fix_command_name = False
+        fix_command_name = header_text == 'name'
     if fix_command_name and key == 'Para':
         for i in range(len(value)):
             if value[i]['t'] == 'Code' and value[i]['c'][1].startswith('dotnet '):
